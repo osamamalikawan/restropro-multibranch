@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS — chili/basil/turmeric identity.
+   Raw values live in :root / [data-theme="light"] so they can be
+   swapped at runtime (see ThemeToggle); the @theme block below
+   just points Tailwind v4's generated utilities at those same
+   variables, so e.g. `bg-canvas` always reflects whichever theme
+   is currently active rather than being baked in at build time.
+   ============================================================ */
+:root {
+  --bg-canvas: #161310;
+  --bg-surface: #1e1a16;
+  --bg-raised: #26211c;
+  --bg-hover: #2e2721;
+  --line: #38312a;
+  --line-soft: #2a2420;
+  --ink-strong: #f6f0e6;
+  --ink-mid: #cbc0b0;
+  --ink-faint: #8c8072;
+}
+[data-theme="light"] {
+  --bg-canvas: #f7f1e6;
+  --bg-surface: #fffdf8;
+  --bg-raised: #ffffff;
+  --bg-hover: #f1e9d9;
+  --line: #e3d7be;
+  --line-soft: #ece2cc;
+  --ink-strong: #241c12;
+  --ink-mid: #5c5140;
+  --ink-faint: #8c8067;
+}
+
+@theme {
+  /* brand accents — same across both themes, matching the original prototype */
+  --color-chili-300: #F2A075;
+  --color-chili-400: #E86B3E;
+  --color-chili-500: #D9481F;
+  --color-chili-600: #B8391A;
+  --color-basil-400: #5C9273;
+  --color-basil-500: #3F6E52;
+  --color-basil-600: #2E5A41;
+  --color-turmeric-400: #E0B662;
+  --color-turmeric-500: #C99A3E;
+  --color-crimson-400: #D25861;
+  --color-crimson-500: #B7383F;
+
+  /* theme-aware surface/text tokens, indirected through the runtime variables above */
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-raised: var(--bg-raised);
+  --color-hover: var(--bg-hover);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-faint: var(--ink-faint);
+
+  /* fonts — set by next/font as CSS vars on <body> in layout.tsx.
+     --font-mono overrides Tailwind's built-in font-mono utility;
+     --font-display / --font-body are new utilities Tailwind v4
+     generates automatically from any --font-* key in this block. */
+  --font-display: var(--font-fraunces), serif;
+  --font-body: var(--font-public-sans), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
+}
+
+body {
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  transition: background .25s ease, color .25s ease;
+}
+
+/* ============================================================
+   Global loading indicator (components/global-loading.tsx) and
+   the route-level loading.tsx fallback share these styles.
+   ============================================================ */
+.rp-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity .2s ease;
+}
+.rp-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--color-chili-400), var(--color-turmeric-400));
+  border-radius: 999px;
+  animation: rp-slide 1s ease-in-out infinite;
+}
+.rp-bar-on { opacity: 1; }
+
+.rp-corner {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--ink-mid);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 16px rgb(0 0 0 / .25);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.rp-corner-on { opacity: 1; transform: translateY(0); }
+
+.rp-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--color-chili-500);
+  animation: rp-spin .7s linear infinite;
+}
+.rp-spinner-lg { width: 36px; height: 36px; border-width: 3px; }
+
+@keyframes rp-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+@keyframes rp-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rp-bar::before, .rp-spinner { animation-duration: 2s; }
+}
